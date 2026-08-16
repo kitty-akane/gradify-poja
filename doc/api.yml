@@ -1,0 +1,690 @@
+openapi: 3.0.3
+info:
+  title: Gradify API
+  description: >
+    API POJA pour la gestion des notes et des diplômés de HEI : cours, groupes,
+    inscriptions, examens, notes (avec historique), relevés de notes (PDF envoyé
+    par email via un lien S3), et export Excel des diplômés par promotion.
+  version: "1.0.0"
+servers:
+  - url: /
+
+security:
+  - UserIdAuth: []
+
+tags:
+  - name: courses
+  - name: groups
+  - name: course-offerings
+  - name: exams
+  - name: grades
+  - name: students
+  - name: teachers
+  - name: transcripts
+  - name: promotions
+
+paths:
+
+  /courses:
+    get:
+      tags: [courses]
+      summary: Lister les cours
+      operationId: getCourses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Course" }
+    post:
+      tags: [courses]
+      summary: Créer un cours (ADMIN)
+      operationId: createCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCourse" }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /groups:
+    get:
+      tags: [groups]
+      summary: Lister les groupes (filtrable par année/niveau)
+      operationId: getGroups
+      parameters:
+        - name: academicYear
+          in: query
+          schema: { type: string }
+        - name: level
+          in: query
+          schema: { $ref: "#/components/schemas/Level" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Group" }
+    post:
+      tags: [groups]
+      summary: Créer un groupe (ADMIN)
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateGroup" }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Group" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /course-offerings:
+    get:
+      tags: [course-offerings]
+      summary: Lister les cours donnés (filtrable par groupe/année/enseignant)
+      operationId: getCourseOfferings
+      parameters:
+        - name: groupId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: academicYear
+          in: query
+          schema: { type: string }
+        - name: teacherId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CourseOffering" }
+    post:
+      tags: [course-offerings]
+      summary: Affecter un cours à un/des enseignant(s) et un groupe (ADMIN)
+      operationId: createCourseOffering
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCourseOffering" }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseOffering" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /course-offerings/{offeringId}/exams:
+    parameters:
+      - name: offeringId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [exams]
+      summary: Lister les examens d'un cours donné
+      operationId: getExamsByOffering
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Exam" }
+    post:
+      tags: [exams]
+      summary: Créer un examen pour un cours donné (enseignant du cours ou ADMIN)
+      operationId: createExam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateExam" }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Exam" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /exams/{examId}/grades:
+    parameters:
+      - name: examId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [grades]
+      summary: Lister les notes d'un examen (enseignant du cours ou ADMIN)
+      operationId: getGradesByExam
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Grade" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /exams/{examId}/grades/{studentId}:
+    parameters:
+      - name: examId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: studentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      tags: [grades]
+      summary: >
+        Saisir/modifier la note d'un étudiant à un examen (enseignant du cours
+        ou ADMIN). Un motif est obligatoire ; chaque modification est tracée
+        dans l'historique de la note.
+      operationId: upsertGrade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpsertGrade" }
+      responses:
+        "200":
+          description: Note créée ou mise à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Grade" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /grades/{gradeId}/history:
+    parameters:
+      - name: gradeId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [grades]
+      summary: Historique des modifications d'une note (enseignant du cours ou ADMIN)
+      operationId: getGradeHistory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GradeHistory" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /students:
+    get:
+      tags: [students]
+      summary: Lister les étudiants (ADMIN, TEACHER)
+      operationId: getStudents
+      parameters:
+        - name: groupId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Student" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /students/{studentId}:
+    parameters:
+      - name: studentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [students]
+      summary: Détail d'un étudiant (lui-même, ADMIN, ou TEACHER)
+      operationId: getStudentById
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /students/{studentId}/grades:
+    parameters:
+      - name: studentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [students]
+      summary: Notes d'un étudiant (lui-même, ses enseignants, ou ADMIN)
+      operationId: getStudentGrades
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Grade" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /students/{studentId}/enrollments:
+    parameters:
+      - name: studentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [students]
+      summary: Historique des groupes d'un étudiant (lui-même, ADMIN)
+      operationId: getStudentEnrollments
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Enrollment" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [students]
+      summary: >
+        Changer un étudiant de groupe (ADMIN). Un étudiant peut changer de
+        groupe à tout moment ; ceci crée une nouvelle inscription.
+      operationId: changeStudentGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateEnrollment" }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Enrollment" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /students/{studentId}/transcript:send:
+    parameters:
+      - name: studentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [transcripts]
+      summary: >
+        Demande l'envoi par email du relevé de notes (PDF) de l'étudiant.
+        Traitement asynchrone : le PDF est généré, déposé sur S3, et un lien
+        pré-signé est envoyé par email à l'étudiant. Autorisé pour
+        l'étudiant lui-même ou un ADMIN.
+      operationId: sendStudentTranscript
+      responses:
+        "202":
+          description: Demande acceptée, traitement asynchrone en cours
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TranscriptRequestAck" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /teachers:
+    get:
+      tags: [teachers]
+      summary: Lister les enseignants
+      operationId: getTeachers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Teacher" }
+
+  /teachers/{teacherId}/course-offerings:
+    parameters:
+      - name: teacherId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [teachers]
+      summary: Cours donnés par un enseignant (lui-même ou ADMIN)
+      operationId: getTeacherCourseOfferings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CourseOffering" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /promotions:
+    get:
+      tags: [promotions]
+      summary: >
+        Lister les promotions connues (une promotion = une année académique de
+        groupes de niveau L3, donc potentiellement diplômable).
+      operationId: getPromotions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Promotion" }
+
+  /promotions/{promotion}/graduates:
+    parameters:
+      - name: promotion
+        in: path
+        required: true
+        description: Année académique de la promotion (ex. 2025-2026)
+        schema: { type: string }
+    get:
+      tags: [promotions]
+      summary: Lister les diplômés d'une promotion (JSON)
+      operationId: getGraduates
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Graduate" }
+
+  /promotions/{promotion}/graduates/export:
+    parameters:
+      - name: promotion
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [promotions]
+      summary: >
+        Télécharger la liste des diplômés d'une promotion au format Excel
+        (synchrone, aucun email envoyé).
+      operationId: exportGraduates
+      responses:
+        "200":
+          description: Fichier Excel (.xlsx)
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /promotions/{promotion}/results:
+    parameters:
+      - name: promotion
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [promotions]
+      summary: Résultats de la promotion sur les 3 ans (ADMIN uniquement)
+      operationId: getPromotionResults
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PromotionResults" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+components:
+  securitySchemes:
+    UserIdAuth:
+      type: apiKey
+      in: header
+      name: X-User-Id
+      description: >
+        Identifiant (UUID) de l'utilisateur courant, résolu en base pour en
+        déduire le rôle (ADMIN / TEACHER / STUDENT). Prévu pour être remplacé
+        par un Bearer JWT (dépendances jjwt déjà présentes dans le projet).
+
+  responses:
+    Forbidden:
+      description: Accès refusé (rôle insuffisant, ou ressource appartenant à un autre utilisateur)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+
+    Level:
+      type: string
+      enum: [L1, L2, L3]
+
+    Track:
+      type: string
+      enum: [TRONC_COMMUN, TN, EL]
+
+    Role:
+      type: string
+      enum: [ADMIN, STUDENT, TEACHER]
+
+    Course:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ref: { type: string }
+        title: { type: string }
+        credits: { type: integer }
+      required: [id, ref, title, credits]
+
+    CreateCourse:
+      type: object
+      properties:
+        ref: { type: string }
+        title: { type: string }
+        credits: { type: integer }
+      required: [ref, title, credits]
+
+    Group:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ref: { type: string }
+        level: { $ref: "#/components/schemas/Level" }
+        academicYear: { type: string }
+      required: [id, ref, level, academicYear]
+
+    CreateGroup:
+      type: object
+      properties:
+        ref: { type: string }
+        level: { $ref: "#/components/schemas/Level" }
+        academicYear: { type: string }
+      required: [ref, level, academicYear]
+
+    CourseOffering:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        courseId: { type: string, format: uuid }
+        groupId: { type: string, format: uuid }
+        academicYear: { type: string }
+        teacherIds:
+          type: array
+          items: { type: string, format: uuid }
+      required: [id, courseId, groupId, academicYear, teacherIds]
+
+    CreateCourseOffering:
+      type: object
+      properties:
+        courseId: { type: string, format: uuid }
+        groupId: { type: string, format: uuid }
+        academicYear: { type: string }
+        teacherIds:
+          type: array
+          items: { type: string, format: uuid }
+      required: [courseId, groupId, academicYear, teacherIds]
+
+    Exam:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        offeringId: { type: string, format: uuid }
+        label: { type: string }
+        examDate: { type: string, format: date-time }
+        coefficient: { type: number }
+      required: [id, offeringId, label, examDate, coefficient]
+
+    CreateExam:
+      type: object
+      properties:
+        offeringId: { type: string, format: uuid }
+        label: { type: string }
+        examDate: { type: string, format: date-time }
+        coefficient: { type: number }
+      required: [offeringId, label, examDate, coefficient]
+
+    Grade:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        examId: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        value: { type: number }
+      required: [id, examId, studentId, value]
+
+    UpsertGrade:
+      type: object
+      properties:
+        value: { type: number }
+        reason:
+          type: string
+          description: Obligatoire dès qu'une note existante est modifiée (réclamation, erreur...)
+      required: [value, reason]
+
+    GradeHistory:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        gradeId: { type: string, format: uuid }
+        oldValue: { type: number, nullable: true }
+        newValue: { type: number }
+        reason: { type: string }
+        modifiedById: { type: string, format: uuid }
+        modifiedAt: { type: string, format: date-time }
+      required: [id, gradeId, newValue, reason, modifiedById, modifiedAt]
+
+    Student:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        studentNumber: { type: string }
+        entryDate: { type: string, format: date }
+      required: [id, userId, studentNumber, entryDate]
+
+    Teacher:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+      required: [id, userId]
+
+    Enrollment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        groupId: { type: string, format: uuid }
+        academicYear: { type: string }
+        level: { $ref: "#/components/schemas/Level" }
+        track: { $ref: "#/components/schemas/Track" }
+      required: [id, studentId, groupId, academicYear, level, track]
+
+    CreateEnrollment:
+      type: object
+      properties:
+        groupId: { type: string, format: uuid }
+        academicYear: { type: string }
+        level: { $ref: "#/components/schemas/Level" }
+        track: { $ref: "#/components/schemas/Track" }
+      required: [groupId, academicYear, level, track]
+
+    TranscriptRequestAck:
+      type: object
+      properties:
+        studentId: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [PENDING]
+      required: [studentId, status]
+
+    Promotion:
+      type: object
+      properties:
+        academicYear: { type: string }
+        graduateCount: { type: integer }
+      required: [academicYear, graduateCount]
+
+    Graduate:
+      type: object
+      properties:
+        studentId: { type: string, format: uuid }
+        studentNumber: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string }
+        groupRef: { type: string }
+        averageGrade: { type: number, nullable: true }
+      required: [studentId, studentNumber, firstName, lastName, email, groupRef]
+
+    PromotionResults:
+      type: object
+      properties:
+        academicYear: { type: string }
+        yearlyAverages:
+          type: array
+          items:
+            type: object
+            properties:
+              level: { $ref: "#/components/schemas/Level" }
+              academicYear: { type: string }
+              average: { type: number, nullable: true }
+              studentCount: { type: integer }
+            required: [level, academicYear, studentCount]
+      required: [academicYear, yearlyAverages]
