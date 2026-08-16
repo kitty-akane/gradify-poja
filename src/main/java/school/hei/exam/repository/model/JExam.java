@@ -10,7 +10,7 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
-@Table
+@Table(name = "exam")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
