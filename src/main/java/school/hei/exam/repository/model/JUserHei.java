@@ -23,6 +23,9 @@ public class JUserHei {
   @Column(unique = true, nullable = false)
   private String email;
 
+  @Column(nullable = false)
+  private String password;
+
   @Column(name = "phone_number", unique = true, nullable = false)
   private String phoneNumber;
 
