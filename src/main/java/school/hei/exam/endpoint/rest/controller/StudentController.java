@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import school.hei.exam.mapper.EnrollmentMapper;
 import school.hei.exam.mapper.GradeMapper;
 import school.hei.exam.mapper.StudentMapper;
@@ -50,7 +51,10 @@ public class StudentController {
 
   @GetMapping("/{studentId}")
   public Student getStudentById(@PathVariable UUID studentId) {
-    return studentMapper.toModel(studentRepository.findById(studentId).orElseThrow());
+    return studentMapper.toModel(
+        studentRepository
+            .findById(studentId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
   }
 
   @GetMapping("/{studentId}/grades")
