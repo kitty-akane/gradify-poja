@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import school.hei.exam.exception.model.ExceptionBody;
 
 @ControllerAdvice
@@ -35,6 +36,19 @@ public class GlobalExceptionHandler {
         .body(
             new ExceptionBody(
                 400, "Bad Request", exception.getMessage(), status.getPathInfo(), Instant.now()));
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  public ResponseEntity<ExceptionBody> handleResponseStatusException(
+      ResponseStatusException exception, HttpServletRequest status) {
+    return ResponseEntity.status(exception.getStatusCode())
+        .body(
+            new ExceptionBody(
+                exception.getStatusCode().value(),
+                exception.getReason(),
+                exception.getMessage(),
+                status.getPathInfo(),
+                Instant.now()));
   }
 
   @ExceptionHandler(Exception.class)

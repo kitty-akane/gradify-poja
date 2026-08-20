@@ -50,12 +50,11 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/api/auth/**")
                     .permitAll()
+                    .requestMatchers("/courses/**", "/course-offerings/**", "/students/**", "/exams/**", "/grades/**",
+                                      "/teachers/**", "/groups/**", "/api/teacher/**", "/api/student/**")
+                    .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
-                    .requestMatchers("/api/teacher/**")
-                    .hasRole("TEACHER")
-                    .requestMatchers("/api/student/**")
-                    .hasRole("STUDENT")
                     .requestMatchers("/thymeleaf/login", "/css/**", "/js/**")
                     .permitAll()
                     .requestMatchers("/thymeleaf/**")

@@ -35,7 +35,7 @@ public class ExamController {
   @PostMapping
   public ResponseEntity<Exam> createExam(@PathVariable UUID offeringId, @RequestBody Exam exam) {
     if (!offeringId.equals(exam.offeringId())) {
-      throw new IllegalArgumentException("offeringId in path and body must match");
+      return ResponseEntity.badRequest().build();
     }
 
     var courseOffering = entityManager.getReference(JCourseOffering.class, offeringId);
