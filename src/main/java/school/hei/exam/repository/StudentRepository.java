@@ -1,7 +1,10 @@
 package school.hei.exam.repository;
 
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import school.hei.exam.repository.model.JStudent;
 
-public interface StudentRepository extends JpaRepository<JStudent, UUID> {}
+public interface StudentRepository extends JpaRepository<JStudent, UUID> {
+  List<JStudent> findByEnrollments_Group_Id(UUID groupId);
+}

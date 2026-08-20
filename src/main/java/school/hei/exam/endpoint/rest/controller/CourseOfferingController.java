@@ -36,9 +36,9 @@ public class CourseOfferingController {
       @RequestParam(required = false) UUID teacherId) {
     List<JCourseOffering> found;
     if (groupId != null && academicYear != null) {
-      found = courseOfferingRepository.findByGroupIdAndAcademicYear(groupId, academicYear);
+      found = courseOfferingRepository.findByGroup_IdAndAcademicYear(groupId, academicYear);
     } else if (groupId != null) {
-      found = courseOfferingRepository.findByGroupId(groupId);
+      found = courseOfferingRepository.findByGroup_Id(groupId);
     } else if (academicYear != null) {
       found = courseOfferingRepository.findByAcademicYear(academicYear);
     } else if (teacherId != null) {

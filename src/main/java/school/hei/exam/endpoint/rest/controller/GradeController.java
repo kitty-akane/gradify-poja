@@ -36,7 +36,7 @@ public class GradeController {
 
   @GetMapping("/exams/{examId}/grades")
   public List<Grade> getGradesByExam(@PathVariable UUID examId) {
-    return gradeMapper.toModel(gradeRepository.findByExamId(examId));
+    return gradeMapper.toModel(gradeRepository.findByExam_Id(examId));
   }
 
   @PutMapping("/exams/{examId}/grades/{studentId}")
@@ -49,7 +49,7 @@ public class GradeController {
       throw new IllegalArgumentException("modifiedById is required");
     }
 
-    var existing = gradeRepository.findByExamIdAndStudentId(examId, studentId);
+    var existing = gradeRepository.findByExam_IdAndStudent_Id(examId, studentId);
     var oldValue = existing.map(JGrade::getValue).orElse(null);
 
     JGrade grade;
@@ -82,6 +82,6 @@ public class GradeController {
   @GetMapping("/grades/{gradeId}/history")
   public List<GradeHistory> getGradeHistory(@PathVariable UUID gradeId) {
     return gradeHistoryMapper.toModel(
-        gradeHistoryRepository.findByGradeId(gradeId, Sort.by(Sort.Direction.DESC, "modifiedAt")));
+        gradeHistoryRepository.findByGrade_Id(gradeId, Sort.by(Sort.Direction.DESC, "modifiedAt")));
   }
 }

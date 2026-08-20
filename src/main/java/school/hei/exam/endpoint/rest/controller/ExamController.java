@@ -29,7 +29,7 @@ public class ExamController {
 
   @GetMapping
   public List<Exam> getExamsByOffering(@PathVariable UUID offeringId) {
-    return examMapper.toModel(examRepository.findByCourseOfferingId(offeringId));
+    return examMapper.toModel(examRepository.findByCourseOffering_Id(offeringId));
   }
 
   @PostMapping

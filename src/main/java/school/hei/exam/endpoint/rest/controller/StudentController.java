@@ -55,12 +55,12 @@ public class StudentController {
 
   @GetMapping("/{studentId}/grades")
   public List<Grade> getStudentGrades(@PathVariable UUID studentId) {
-    return gradeMapper.toModel(gradeRepository.findByStudentId(studentId));
+    return gradeMapper.toModel(gradeRepository.findByStudent_Id(studentId));
   }
 
   @GetMapping("/{studentId}/enrollments")
   public List<Enrollment> getStudentEnrollments(@PathVariable UUID studentId) {
-    return enrollmentMapper.toModel(enrollmentRepository.findByStudentId(studentId));
+    return enrollmentMapper.toModel(enrollmentRepository.findByStudent_Id(studentId));
   }
 
   @PostMapping("/{studentId}/enrollments")
@@ -69,7 +69,7 @@ public class StudentController {
     var group = entityManager.getReference(JGroup.class, enrollment.groupId());
 
     var existing =
-        enrollmentRepository.findByStudentIdAndAcademicYear(studentId, enrollment.academicYear());
+        enrollmentRepository.findByStudent_IdAndAcademicYear(studentId, enrollment.academicYear());
 
     JEnrollment toSave;
     HttpStatus status;
