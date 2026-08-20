@@ -7,5 +7,6 @@ import school.hei.exam.repository.model.JStudent;
 
 public interface StudentRepository extends JpaRepository<JStudent, UUID> {
   boolean existsByIdAndUserHei_Id(UUID studentId, UUID userHeiId);
+
   List<JStudent> findByEnrollments_Group_Id(UUID groupId);
 }
