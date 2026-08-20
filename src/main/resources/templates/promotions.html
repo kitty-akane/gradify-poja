@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Promotions HEI</title>
+
+    <link rel="stylesheet" th:href="@{/hei-theme.css}">
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="page-header">
+        <h1>Liste des promotions</h1>
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrapper">
+
+            <table class="promotions-table">
+
+                <thead>
+                <tr>
+                    <th>Promotion</th>
+                    <th>TN</th>
+                    <th>EL</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="promo : ${promotions}">
+
+                    <td th:text="${promo}">
+                        Promotion
+                    </td>
+
+                    <td>
+                        <a
+                                class="download-link tn"
+                                th:href="@{/api/admin/promotions/{p}/graduates.xlsx(p=${promo}, track='TN')}">
+                            Télécharger TN
+                        </a>
+                    </td>
+
+                    <td>
+                        <a
+                                class="download-link el"
+                                th:href="@{/api/admin/promotions/{p}/graduates.xlsx(p=${promo}, track='EL')}">
+                            Télécharger EL
+                        </a>
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div
+                th:if="${#lists.isEmpty(promotions)}"
+                class="empty-state">
+
+            Aucune promotion disponible.
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
