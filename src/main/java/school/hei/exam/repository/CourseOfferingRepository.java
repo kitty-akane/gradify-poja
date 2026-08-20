@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import school.hei.exam.repository.model.JCourseOffering;
 
 public interface CourseOfferingRepository extends JpaRepository<JCourseOffering, UUID> {
+  boolean existsByIdAndTeachers_UserHei_Id(UUID courseOfferingId, UUID userHeiId);
   List<JCourseOffering> findByGroup_IdAndAcademicYear(UUID groupId, String academicYear);
 
   List<JCourseOffering> findByGroup_Id(UUID groupId);
