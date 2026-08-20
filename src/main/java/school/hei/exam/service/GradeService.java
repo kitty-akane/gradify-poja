@@ -36,34 +36,28 @@ public class GradeService {
 
   @Transactional(readOnly = true)
   public List<Grade> getGradesForCourseOffering(UUID courseOfferingId) {
-    return gradeMapper.toModel(
-        gradeRepository.findByExam_CourseOffering_Id(courseOfferingId));
+    return gradeMapper.toModel(gradeRepository.findByExam_CourseOffering_Id(courseOfferingId));
   }
 
   @Transactional(readOnly = true)
   public List<Grade> getGradesForTeacher(UUID teacherId) {
-    return gradeMapper.toModel(
-        gradeRepository.findByExam_CourseOffering_Teachers_Id(teacherId));
+    return gradeMapper.toModel(gradeRepository.findByExam_CourseOffering_Teachers_Id(teacherId));
   }
 
   public Grade createGrade(Grade grade) {
-    return gradeMapper.toModel(
-        gradeRepository.save(gradeMapper.toEntity(grade)));
+    return gradeMapper.toModel(gradeRepository.save(gradeMapper.toEntity(grade)));
   }
 
-  public Grade updateGrade(
-      UUID gradeId, BigDecimal newValue, String reason, UUID modifiedById) {
+  public Grade updateGrade(UUID gradeId, BigDecimal newValue, String reason, UUID modifiedById) {
 
     JGrade grade =
         gradeRepository
             .findById(gradeId)
-            .orElseThrow(
-                () -> new NotFoundException("Note introuvable : " + gradeId));
+            .orElseThrow(() -> new NotFoundException("Note introuvable : " + gradeId));
 
     BigDecimal oldValue = grade.getValue();
 
-    JUserHei author =
-        entityManager.getReference(JUserHei.class, modifiedById);
+    JUserHei author = entityManager.getReference(JUserHei.class, modifiedById);
 
     gradeHistoryRepository.save(
         JGradeHistory.builder()

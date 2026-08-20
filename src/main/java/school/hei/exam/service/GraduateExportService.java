@@ -33,8 +33,7 @@ public class GraduateExportService {
     try (Workbook workbook = new XSSFWorkbook();
         ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-      Sheet sheet =
-          workbook.createSheet("Diplômés " + promotion + " - " + track);
+      Sheet sheet = workbook.createSheet("Diplômés " + promotion + " - " + track);
 
       CellStyle headerStyle = workbook.createCellStyle();
       Font headerFont = workbook.createFont();
@@ -43,9 +42,7 @@ public class GraduateExportService {
 
       Row header = sheet.createRow(0);
 
-      String[] columns = {
-        "Rang", "STD", "Nom", "Prénom", "Moyenne générale"
-      };
+      String[] columns = {"Rang", "STD", "Nom", "Prénom", "Moyenne générale"};
 
       for (int i = 0; i < columns.length; i++) {
         Cell cell = header.createCell(i);
@@ -73,8 +70,7 @@ public class GraduateExportService {
       return out.toByteArray();
 
     } catch (IOException e) {
-      throw new ExportException(
-          "Erreur lors de la génération du fichier Excel");
+      throw new ExportException("Erreur lors de la génération du fichier Excel");
     }
   }
 }

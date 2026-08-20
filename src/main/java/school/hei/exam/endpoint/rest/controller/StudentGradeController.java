@@ -22,8 +22,7 @@ public class StudentGradeController {
   private final EventProducer<SendTranscriptRequested> eventProducer;
 
   @GetMapping("/{studentId}/grades")
-  public List<Grade> getMyGrades(
-      @PathVariable UUID studentId, @RequestParam String academicYear) {
+  public List<Grade> getMyGrades(@PathVariable UUID studentId, @RequestParam String academicYear) {
     if (!authorizationService.isSelfStudentOrAdmin(studentId)) {
       throw new ForbiddenException("Vous ne pouvez consulter que vos propres notes");
     }
@@ -39,8 +38,7 @@ public class StudentGradeController {
       throw new ForbiddenException("Vous ne pouvez recevoir que votre propre relevé");
     }
 
-    eventProducer.accept(
-        List.of(SendTranscriptRequested.builder().studentId(studentId).build()));
+    eventProducer.accept(List.of(SendTranscriptRequested.builder().studentId(studentId).build()));
 
     return ResponseEntity.accepted().build();
   }

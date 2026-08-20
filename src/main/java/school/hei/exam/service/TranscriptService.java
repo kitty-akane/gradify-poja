@@ -37,14 +37,10 @@ public class TranscriptService {
     JStudent student =
         studentRepository
             .findById(studentId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        "Étudiant introuvable : " + studentId));
+            .orElseThrow(() -> new NotFoundException("Étudiant introuvable : " + studentId));
 
     List<JEnrollment> enrollments =
-        enrollmentRepository.findByStudent_IdOrderByAcademicYearAsc(
-            studentId);
+        enrollmentRepository.findByStudent_IdOrderByAcademicYearAsc(studentId);
 
     List<TranscriptPdfGenerator.YearTranscript> yearTranscripts =
         enrollments.stream()
@@ -53,9 +49,8 @@ public class TranscriptService {
                   String academicYear = enrollment.getAcademicYear();
 
                   List<JCourseOffering> offerings =
-                      gradeCalculationService
-                          .getCourseOfferingsForStudentYear(
-                              studentId, academicYear);
+                      gradeCalculationService.getCourseOfferingsForStudentYear(
+                          studentId, academicYear);
 
                   List<TranscriptPdfGenerator.CourseLine> lines =
                       offerings.stream()
@@ -64,41 +59,27 @@ public class TranscriptService {
                                   new TranscriptPdfGenerator.CourseLine(
                                       o.getCourse().getRef(),
                                       o.getCourse().getTitle(),
-                                      gradeCalculationService
-                                          .computeCourseOfferingAverage(
-                                              studentId, o)))
+                                      gradeCalculationService.computeCourseOfferingAverage(
+                                          studentId, o)))
                           .toList();
 
                   return new TranscriptPdfGenerator.YearTranscript(
                       academicYear,
                       enrollment.getLevel().name(),
                       lines,
-                      gradeCalculationService
-                          .computeYearGeneralAverage(
-                              studentId, academicYear));
+                      gradeCalculationService.computeYearGeneralAverage(studentId, academicYear));
                 })
             .toList();
 
     String fullName =
-        student.getUserHei().getFirstName()
-            + " "
-            + student.getUserHei().getLastName();
+        student.getUserHei().getFirstName() + " " + student.getUserHei().getLastName();
 
     byte[] pdfContent =
-        pdfGenerator.generate(
-            fullName,
-            student.getStudentNumber(),
-            yearTranscripts);
+        pdfGenerator.generate(fullName, student.getStudentNumber(), yearTranscripts);
 
-    String bucketKey =
-        "transcripts/"
-            + studentId
-            + "/"
-            + UUID.randomUUID()
-            + ".pdf";
+    String bucketKey = "transcripts/" + studentId + "/" + UUID.randomUUID() + ".pdf";
 
-    File tempFile =
-        createTempFile("transcript-" + studentId, ".pdf");
+    File tempFile = createTempFile("transcript-" + studentId, ".pdf");
 
     try (FileOutputStream fos = new FileOutputStream(tempFile)) {
       fos.write(pdfContent);
@@ -106,10 +87,7 @@ public class TranscriptService {
 
     bucketComponent.upload(tempFile, bucketKey);
 
-    String presignedUrl =
-        bucketComponent
-            .presign(bucketKey, Duration.ofDays(7))
-            .toString();
+    String presignedUrl = bucketComponent.presign(bucketKey, Duration.ofDays(7)).toString();
 
     return GeneratedTranscript.builder()
         .recipientEmail(student.getUserHei().getEmail())
@@ -120,7 +98,5 @@ public class TranscriptService {
 
   @Builder
   public record GeneratedTranscript(
-      String recipientEmail,
-      String studentFullName,
-      String presignedUrl) {}
+      String recipientEmail, String studentFullName, String presignedUrl) {}
 }

@@ -26,8 +26,7 @@ public class GradeCalculationService {
   private final CourseOfferingRepository courseOfferingRepository;
   private final GradeRepository gradeRepository;
 
-  public BigDecimal computeCourseOfferingAverage(
-      UUID studentId, JCourseOffering courseOffering) {
+  public BigDecimal computeCourseOfferingAverage(UUID studentId, JCourseOffering courseOffering) {
 
     List<JGrade> studentGrades =
         gradeRepository.findByExam_CourseOffering_Id(courseOffering.getId()).stream()
@@ -70,10 +69,7 @@ public class GradeCalculationService {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        "Aucune inscription pour l'étudiant "
-                            + studentId
-                            + " en "
-                            + academicYear));
+                        "Aucune inscription pour l'étudiant " + studentId + " en " + academicYear));
 
     Track studentTrack = enrollment.getTrack();
 
@@ -99,8 +95,7 @@ public class GradeCalculationService {
 
   public boolean hasValidatedAllCoursesForYear(UUID studentId, String academicYear) {
     return getCourseOfferingsForStudentYear(studentId, academicYear).stream()
-        .allMatch(
-            o -> computeCourseOfferingAverage(studentId, o).compareTo(BigDecimal.TEN) >= 0);
+        .allMatch(o -> computeCourseOfferingAverage(studentId, o).compareTo(BigDecimal.TEN) >= 0);
   }
 
   public BigDecimal computeCursusAverage(UUID studentId) {
@@ -118,11 +113,9 @@ public class GradeCalculationService {
     List<String> academicYears = distinctAcademicYears(studentId);
 
     boolean allValidated =
-        academicYears.stream()
-            .allMatch(year -> hasValidatedAllCoursesForYear(studentId, year));
+        academicYears.stream().allMatch(year -> hasValidatedAllCoursesForYear(studentId, year));
 
-    return allValidated
-        && computeCursusAverage(studentId).compareTo(BigDecimal.TEN) >= 0;
+    return allValidated && computeCursusAverage(studentId).compareTo(BigDecimal.TEN) >= 0;
   }
 
   private List<String> distinctAcademicYears(UUID studentId) {
@@ -132,15 +125,13 @@ public class GradeCalculationService {
         .toList();
   }
 
-  private BigDecimal weightedAverageByCredits(
-      UUID studentId, List<JCourseOffering> offerings) {
+  private BigDecimal weightedAverageByCredits(UUID studentId, List<JCourseOffering> offerings) {
 
     BigDecimal weightedSum = BigDecimal.ZERO;
     BigDecimal totalCredits = BigDecimal.ZERO;
 
     for (JCourseOffering offering : offerings) {
-      BigDecimal credits =
-          BigDecimal.valueOf(offering.getCourse().getCredits());
+      BigDecimal credits = BigDecimal.valueOf(offering.getCourse().getCredits());
 
       BigDecimal average = computeCourseOfferingAverage(studentId, offering);
 

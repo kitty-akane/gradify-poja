@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TranscriptPdfGenerator {
 
-  public byte[] generate(
-      String studentFullName,
-      String studentNumber,
-      List<YearTranscript> years)
+  public byte[] generate(String studentFullName, String studentNumber, List<YearTranscript> years)
       throws IOException {
 
     try (PDDocument document = new PDDocument();
@@ -28,51 +25,33 @@ public class TranscriptPdfGenerator {
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        try (PDPageContentStream cs =
-            new PDPageContentStream(document, page)) {
+        try (PDPageContentStream cs = new PDPageContentStream(document, page)) {
 
           float y = 750;
 
           cs.beginText();
-          cs.setFont(
-              new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-              16);
+          cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 16);
           cs.newLineAtOffset(50, y);
-          cs.showText(
-              "Relevé de notes - "
-                  + studentFullName
-                  + " ("
-                  + studentNumber
-                  + ")");
+          cs.showText("Relevé de notes - " + studentFullName + " (" + studentNumber + ")");
           cs.endText();
 
           y -= 30;
 
           cs.beginText();
-          cs.setFont(
-              new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-              13);
+          cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 13);
           cs.newLineAtOffset(50, y);
-          cs.showText(
-              "Année : " + year.academicYear() + " - " + year.level());
+          cs.showText("Année : " + year.academicYear() + " - " + year.level());
           cs.endText();
 
           y -= 25;
 
-          cs.setFont(
-              new PDType1Font(Standard14Fonts.FontName.HELVETICA),
-              11);
+          cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 11);
 
           for (CourseLine line : year.courseLines()) {
             cs.beginText();
             cs.newLineAtOffset(50, y);
             cs.showText(
-                line.courseRef()
-                    + " - "
-                    + line.courseTitle()
-                    + " : "
-                    + line.average()
-                    + "/20");
+                line.courseRef() + " - " + line.courseTitle() + " : " + line.average() + "/20");
             cs.endText();
 
             y -= 18;
@@ -81,14 +60,9 @@ public class TranscriptPdfGenerator {
           y -= 10;
 
           cs.beginText();
-          cs.setFont(
-              new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-              12);
+          cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 12);
           cs.newLineAtOffset(50, y);
-          cs.showText(
-              "Moyenne générale : "
-                  + year.generalAverage()
-                  + "/20");
+          cs.showText("Moyenne générale : " + year.generalAverage() + "/20");
           cs.endText();
         }
       }
@@ -98,14 +72,8 @@ public class TranscriptPdfGenerator {
     }
   }
 
-  public record CourseLine(
-      String courseRef,
-      String courseTitle,
-      BigDecimal average) {}
+  public record CourseLine(String courseRef, String courseTitle, BigDecimal average) {}
 
   public record YearTranscript(
-      String academicYear,
-      String level,
-      List<CourseLine> courseLines,
-      BigDecimal generalAverage) {}
+      String academicYear, String level, List<CourseLine> courseLines, BigDecimal generalAverage) {}
 }

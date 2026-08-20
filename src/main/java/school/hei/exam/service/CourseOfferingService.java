@@ -22,14 +22,12 @@ public class CourseOfferingService {
     JCourseOffering offering =
         courseOfferingRepository
             .findById(courseOfferingId)
-            .orElseThrow(
-                () -> new NotFoundException("Cours introuvable : " + courseOfferingId));
+            .orElseThrow(() -> new NotFoundException("Cours introuvable : " + courseOfferingId));
 
     JTeacher teacher =
         teacherRepository
             .findById(teacherId)
-            .orElseThrow(
-                () -> new NotFoundException("Enseignant introuvable : " + teacherId));
+            .orElseThrow(() -> new NotFoundException("Enseignant introuvable : " + teacherId));
 
     if (!offering.getTeachers().contains(teacher)) {
       offering.getTeachers().add(teacher);

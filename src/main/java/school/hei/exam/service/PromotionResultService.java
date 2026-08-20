@@ -23,26 +23,22 @@ public class PromotionResultService {
 
   public List<PromotionResultLine> getResults(String promotion) {
     List<JEnrollment> l3Enrollments =
-        enrollmentRepository.findByLevelAndAcademicYear(
-            Level.L3, promotion);
+        enrollmentRepository.findByLevelAndAcademicYear(Level.L3, promotion);
 
     return buildRankedLines(l3Enrollments);
   }
 
-  public List<PromotionResultLine> getResultsByTrack(
-      String promotion, Track track) {
+  public List<PromotionResultLine> getResultsByTrack(String promotion, Track track) {
 
     List<JEnrollment> l3Enrollments =
-        enrollmentRepository.findByLevelAndAcademicYear(Level.L3, promotion)
-            .stream()
+        enrollmentRepository.findByLevelAndAcademicYear(Level.L3, promotion).stream()
             .filter(e -> e.getTrack() == track)
             .toList();
 
     return buildRankedLines(l3Enrollments);
   }
 
-  private List<PromotionResultLine> buildRankedLines(
-      List<JEnrollment> enrollments) {
+  private List<PromotionResultLine> buildRankedLines(List<JEnrollment> enrollments) {
 
     List<PromotionResultLine> unranked =
         enrollments.stream()
@@ -51,11 +47,9 @@ public class PromotionResultService {
                   var student = enrollment.getStudent();
 
                   BigDecimal average =
-                      gradeCalculationService.computeCursusAverage(
-                          student.getId());
+                      gradeCalculationService.computeCursusAverage(student.getId());
 
-                  boolean validated =
-                      gradeCalculationService.isGraduate(student.getId());
+                  boolean validated = gradeCalculationService.isGraduate(student.getId());
 
                   return PromotionResultLine.builder()
                       .studentId(student.getId())
@@ -67,10 +61,7 @@ public class PromotionResultService {
                       .validated(validated)
                       .build();
                 })
-            .sorted(
-                Comparator.comparing(
-                        PromotionResultLine::generalAverage)
-                    .reversed())
+            .sorted(Comparator.comparing(PromotionResultLine::generalAverage).reversed())
             .toList();
 
     return IntStream.range(0, unranked.size())
