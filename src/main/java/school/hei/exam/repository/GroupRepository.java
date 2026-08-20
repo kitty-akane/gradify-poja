@@ -7,6 +7,8 @@ import school.hei.exam.model.Level;
 import school.hei.exam.repository.model.JGroup;
 
 public interface GroupRepository extends JpaRepository<JGroup, UUID> {
+  List<String> findDistinctAcademicYearByLevel(Level level);
+
   List<JGroup> findByAcademicYearAndLevel(String academicYear, Level level);
 
   List<JGroup> findByAcademicYear(String academicYear);
