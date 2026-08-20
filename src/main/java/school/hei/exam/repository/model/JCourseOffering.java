@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import school.hei.exam.model.Track;
 
 @Entity
 @Table(
@@ -31,6 +32,10 @@ public class JCourseOffering {
 
   @Column(name = "academic_year", nullable = false)
   private String academicYear;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "track")
+  private Track track;
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(

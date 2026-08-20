@@ -25,6 +25,7 @@ public class CourseOfferingMapper {
         .courseId(courseOffering.getCourse().getId())
         .groupId(courseOffering.getGroup().getId())
         .academicYear(courseOffering.getAcademicYear())
+        .track(courseOffering.getTrack())
         .teacherIds(courseOffering.getTeachers().stream().map(JTeacher::getId).toList())
         .build();
   }
@@ -45,6 +46,7 @@ public class CourseOfferingMapper {
         .course(course)
         .group(group)
         .academicYear(courseOffering.academicYear())
+        .track(courseOffering.track())
         .teachers(teachers)
         .build();
   }
