@@ -23,8 +23,7 @@ class StudentControllerIT extends AbstractIT {
     var student = createStudent();
 
     var response =
-        restTemplate.exchange(
-            "/students/" + student.getId(), GET, HttpEntity.EMPTY, Student.class);
+        restTemplate.exchange("/students/" + student.getId(), GET, HttpEntity.EMPTY, Student.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().id()).isEqualTo(student.getId());

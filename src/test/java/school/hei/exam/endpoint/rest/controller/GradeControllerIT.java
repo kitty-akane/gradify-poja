@@ -32,7 +32,8 @@ class GradeControllerIT extends AbstractIT {
             path,
             PUT,
             new HttpEntity<>(
-                new UpsertGradeDto(new BigDecimal("15"), "note initiale", teacher.getUserHei().getId())),
+                new UpsertGradeDto(
+                    new BigDecimal("15"), "note initiale", teacher.getUserHei().getId())),
             Grade.class);
     assertThat(firstPut.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(firstPut.getBody().value()).isEqualByComparingTo("15");

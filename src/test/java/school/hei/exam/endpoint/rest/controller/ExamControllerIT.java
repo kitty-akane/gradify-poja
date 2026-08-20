@@ -31,7 +31,10 @@ class ExamControllerIT extends AbstractIT {
             .build();
     var created =
         restTemplate.exchange(
-            "/course-offerings/" + offering.getId() + "/exams", POST, new HttpEntity<>(body), Exam.class);
+            "/course-offerings/" + offering.getId() + "/exams",
+            POST,
+            new HttpEntity<>(body),
+            Exam.class);
 
     assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(created.getBody().label()).isEqualTo("Partiel 1");
@@ -39,7 +42,10 @@ class ExamControllerIT extends AbstractIT {
 
     var listed =
         restTemplate.exchange(
-            "/course-offerings/" + offering.getId() + "/exams", GET, HttpEntity.EMPTY, Exam[].class);
+            "/course-offerings/" + offering.getId() + "/exams",
+            GET,
+            HttpEntity.EMPTY,
+            Exam[].class);
     assertThat(listed.getBody()).hasSize(1);
   }
 

@@ -48,8 +48,7 @@ class GroupControllerIT extends AbstractIT {
     createGroup(Level.L2, year);
 
     var response =
-        restTemplate.exchange(
-            "/groups?academicYear=" + year, GET, HttpEntity.EMPTY, Group[].class);
+        restTemplate.exchange("/groups?academicYear=" + year, GET, HttpEntity.EMPTY, Group[].class);
 
     assertThat(response.getBody()).hasSize(2);
   }
@@ -59,8 +58,7 @@ class GroupControllerIT extends AbstractIT {
     var marker = "MARK-" + java.util.UUID.randomUUID();
     var group = createGroup(Level.L3, marker);
 
-    var response =
-        restTemplate.exchange("/groups?level=L3", GET, HttpEntity.EMPTY, Group[].class);
+    var response = restTemplate.exchange("/groups?level=L3", GET, HttpEntity.EMPTY, Group[].class);
 
     assertThat(response.getBody()).anyMatch(g -> g.id().equals(group.getId()));
   }

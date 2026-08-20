@@ -116,8 +116,7 @@ class CourseOfferingControllerIT extends AbstractIT {
     createCourseOffering(course, group, "2034-2035", teacher);
 
     var response =
-        restTemplate.exchange(
-            "/course-offerings", GET, HttpEntity.EMPTY, CourseOffering[].class);
+        restTemplate.exchange("/course-offerings", GET, HttpEntity.EMPTY, CourseOffering[].class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotEmpty();

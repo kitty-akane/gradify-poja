@@ -132,8 +132,7 @@ public abstract class AbstractIT extends FacadeIT {
   }
 
   protected JGrade createGrade(JExam exam, JStudent student, BigDecimal value) {
-    return gradeRepository.save(
-        JGrade.builder().exam(exam).student(student).value(value).build());
+    return gradeRepository.save(JGrade.builder().exam(exam).student(student).value(value).build());
   }
 
   protected JEnrollment enroll(JStudent student, JGroup group, String academicYear, Level level) {

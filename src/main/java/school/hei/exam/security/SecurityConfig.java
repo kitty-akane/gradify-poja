@@ -50,8 +50,16 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/api/auth/**")
                     .permitAll()
-                    .requestMatchers("/courses/**", "/course-offerings/**", "/students/**", "/exams/**", "/grades/**",
-                                      "/teachers/**", "/groups/**", "/api/teacher/**", "/api/student/**")
+                    .requestMatchers(
+                        "/courses/**",
+                        "/course-offerings/**",
+                        "/students/**",
+                        "/exams/**",
+                        "/grades/**",
+                        "/teachers/**",
+                        "/groups/**",
+                        "/api/teacher/**",
+                        "/api/student/**")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")

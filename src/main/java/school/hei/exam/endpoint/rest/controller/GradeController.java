@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import school.hei.exam.endpoint.rest.model.UpsertGradeDto;
@@ -45,7 +45,8 @@ public class GradeController {
   public Grade upsertGrade(
       @PathVariable UUID examId, @PathVariable UUID studentId, @RequestBody UpsertGradeDto dto) {
     if (dto.reason() == null || dto.reason().isBlank()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "reason is required to set or change a grade");
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "reason is required to set or change a grade");
     }
     if (dto.modifiedById() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "modifiedById is required");
