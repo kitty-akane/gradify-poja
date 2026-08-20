@@ -23,16 +23,20 @@ public class AdminController {
 
   @GetMapping("/promotions/{promotion}/graduates.xlsx")
   public ResponseEntity<ByteArrayResource> downloadGraduates(
-      @PathVariable String promotion, @RequestParam Track track) {
-    byte[] xlsx = graduateExportService.generateGraduatesXlsx(promotion, track);
-
+      @PathVariable String promotion, @RequestParam(required = false) Track track) {
+    byte[] xlsx =
+        track != null
+            ? graduateExportService.generateGraduatesXlsx(promotion, track)
+            : graduateExportService.generateGraduatesXlsx(promotion);
+    String filename =
+        track != null
+            ? "diplomes_" + promotion + "_" + track + ".xlsx"
+            : "diplomes_" + promotion + ".xlsx";
     return ResponseEntity.ok()
         .contentType(
             MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=diplomes_" + promotion + "_" + track + ".xlsx")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
         .body(new ByteArrayResource(xlsx));
   }
 
